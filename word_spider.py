@@ -3,6 +3,16 @@ import re
 import scrapy
 
 
+def clean_translation(translation):
+    """Clean the translation string from unwanted substrings."""
+    illegal_substrings = ['; french.languagedaily.com',
+                          ';\u00a0french.languagedaily.com',
+                          ' french.languagedaily.co']
+    for iss in illegal_substrings:
+        translation = translation.replace(iss, '')
+    return translation
+
+
 class WordSpider(scrapy.Spider):
     name = 'wordspider'
 
@@ -21,8 +31,12 @@ class WordSpider(scrapy.Spider):
 
         for row in rows:
             cells = row.xpath('td/text()').extract()
+
+            # Ignore empty cells.
             if not cells:
                 continue
+
+            # Extract rank or ignore cell otherwise.
             match = re.search(r'(\d+).', cells[0])
             if not match:
                 continue
@@ -33,6 +47,8 @@ class WordSpider(scrapy.Spider):
 
             word = cells[0]
             translation = cells[1]
+            # Remove unwanted text from translation.
+            translation = clean_translation(translation)
             pos = cells[2]
             yield {'rank': rank,
                    'word': word,

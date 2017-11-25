@@ -30,7 +30,10 @@ class WordSpider(scrapy.Spider):
         rows = response.xpath('//table[@class="vocabulary"]/tbody/tr')
 
         for row in rows:
+            # Extract table columns for row.
             cells = row.xpath('td/text()').extract()
+            # Some few rows nest the word in an <a> element.
+            a_cell = row.xpath('td/a/text()').extract_first()
 
             # Ignore empty cells.
             if not cells:
@@ -48,7 +51,7 @@ class WordSpider(scrapy.Spider):
                 word = cells[-2]
                 translation = None
             else:
-                word = cells[-3]
+                word = a_cell if a_cell else cells[-3]
                 translation = cells[-2]
                 # Remove unwanted text from translation.
                 translation = clean_translation(translation)

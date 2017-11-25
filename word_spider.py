@@ -42,15 +42,24 @@ class WordSpider(scrapy.Spider):
                 continue
             rank = int(match.group(1))
 
-            # Cut off useless leading cells.
-            cells = cells[-3:]
+            # Exctract word and respective translation.
+            # Respect that most of the last words (#759+) have no translation.
+            if len(cells) == 3:
+                word = cells[-2]
+                translation = None
+            else:
+                word = cells[-3]
+                translation = cells[-2]
+                # Remove unwanted text from translation.
+                translation = clean_translation(translation)
 
-            word = cells[0]
-            translation = cells[1]
-            # Remove unwanted text from translation.
-            translation = clean_translation(translation)
-            pos = cells[2]
-            yield {'rank': rank,
-                   'word': word,
-                   'translation': translation,
-                   'pos': pos}
+            # Extract part-of-speech attributes.
+            pos = cells[-1]
+
+            # Assemble vocab dictionary.
+            vocab_dict = {'rank': rank,
+                          'word': word,
+                          'translation': translation,
+                          'pos': pos}
+
+            yield vocab_dict

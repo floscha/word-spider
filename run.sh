@@ -7,7 +7,7 @@ rm $fpath
 scrapy runspider word_spider.py -o $fpath
 
 # Sort the words by rank.
-python sort_json.py $fpath
+python sort_json.py $fpath rank
 
 # Validate that all ranks from 1 to 1000 exist.
 python validate.py $fpath
